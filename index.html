@@ -7,16 +7,21 @@
 
 <style>
   body{
-    margin:0; font-family: Arial, sans-serif;
-    background:#111; color:#fff;
-    display:flex; height:100vh;
+    margin:0;
+    font-family: Arial, sans-serif;
+    background:#111;
+    color:#fff;
+    display:flex;
+    height:100vh;
   }
 
   /* SIDEBAR */
   #sidebar{
-    width:300px; background:#1c1c1c;
+    width:300px;
+    background:#1c1c1c;
     border-right:1px solid #333;
-    display:flex; flex-direction:column;
+    display:flex;
+    flex-direction:column;
     overflow:hidden;
   }
 
@@ -69,30 +74,39 @@
     border-bottom:1px solid #2a2a2a;
     user-select:none;
   }
+
   .channel:hover{ background:#333; }
   .channel.active{ background:#0078ff; }
 
   /* PLAYER */
   #playerWrap{
-    position:relative; flex:1; background:#000;
-  }
-  iframe{
-    width:100%; height:100%;
-    border:none; background:#000;
+    position:relative;
+    flex:1;
+    background:#000;
   }
 
-  /* Anti primer click */
+  iframe{
+    width:100%;
+    height:100%;
+    border:none;
+    background:#000;
+  }
+
+  /* BLOQUEO PRIMER CLICK */
   #clickBlocker{
-    position:absolute; inset:0;
+    position:absolute;
+    inset:0;
     z-index:10;
     background:rgba(0,0,0,0.55);
     cursor:pointer;
     display:none;
   }
+
   #hint{
     position:absolute;
     z-index:11;
-    left:50%; top:50%;
+    left:50%;
+    top:50%;
     transform:translate(-50%,-50%);
     background:rgba(0,0,0,0.7);
     padding:16px 22px;
@@ -129,29 +143,21 @@
 </div>
 
 <script>
-/**
- * IMPORTANTE:
- * - Aquí NO “busco” streams. Solo organizo tu lista.
- * - Puedes crear categorías (por ejemplo: "Chile Fútbol") y luego
- *   tú agregas los IDs/canales que correspondan en tu fuente.
- */
-
-// ====== CANALES (edítalos como quieras) ======
+/* =========================
+   LISTA DE CANALES
+   ========================= */
 const channels = [
-  // Chile Fútbol (ejemplo de categoría)
   { id: 302, name: "Canal 302", category: "Chile Fútbol" },
+  { id: 642, name: "Fútbol Chile (642)", category: "Chile Fútbol" },
 
-  // Deportes internacionales
   { id: 491, name: "beIN Sports Australia 1", category: "Deportes" },
-
-  // Kids
   { id: 648, name: "Boomerang", category: "Kids" },
-
-  // Otros
   { id: 401, name: "TVO CA", category: "Otros" }
 ];
 
-// ====== UI refs ======
+/* =========================
+   REFERENCIAS UI
+   ========================= */
 const catsWrap = document.getElementById("cats");
 const list = document.getElementById("channels");
 const search = document.getElementById("search");
@@ -159,11 +165,15 @@ const iframe = document.getElementById("iframePlayer");
 const blocker = document.getElementById("clickBlocker");
 const hint = document.getElementById("hint");
 
-// ====== State ======
+/* =========================
+   ESTADO
+   ========================= */
 let activeCategory = "Todo";
 let activeChannelId = null;
 
-// ====== Helpers ======
+/* =========================
+   FUNCIONES
+   ========================= */
 function uniqueCategories(items){
   const set = new Set(items.map(x => x.category || "Otros"));
   return ["Todo", ...Array.from(set).sort((a,b)=>a.localeCompare(b))];
@@ -171,16 +181,14 @@ function uniqueCategories(items){
 
 function matchesFilters(ch){
   const q = (search.value || "").trim().toLowerCase();
-  const inCat = (activeCategory === "Todo") || ((ch.category || "Otros") === activeCategory);
+  const inCat = activeCategory === "Todo" || ch.category === activeCategory;
   const inSearch = !q || ch.name.toLowerCase().includes(q);
   return inCat && inSearch;
 }
 
 function renderCategories(){
   catsWrap.innerHTML = "";
-  const cats = uniqueCategories(channels);
-
-  cats.forEach(cat => {
+  uniqueCategories(channels).forEach(cat => {
     const chip = document.createElement("div");
     chip.className = "chip" + (cat === activeCategory ? " active" : "");
     chip.textContent = cat;
@@ -194,11 +202,11 @@ function renderCategories(){
 }
 
 function loadChannel(ch){
-  // activar overlay anti-popup
+  activeChannelId = ch.id;
+
   blocker.style.display = "block";
   hint.style.display = "block";
 
-  activeChannelId = ch.id;
   renderChannelList();
 
   iframe.removeAttribute("src");
@@ -209,7 +217,6 @@ function loadChannel(ch){
 
 function renderChannelList(){
   list.innerHTML = "";
-
   const filtered = channels.filter(matchesFilters);
 
   filtered.forEach(ch => {
@@ -219,25 +226,21 @@ function renderChannelList(){
     div.onclick = () => loadChannel(ch);
     list.appendChild(div);
   });
-
-  // si no hay canal activo o ya no está en filtro, selecciona el primero filtrado
-  if ((!activeChannelId || !filtered.some(x => x.id === activeChannelId)) && filtered.length){
-    // no autoload para evitar popups al cargar; deja que el usuario haga click si quieres
-    // Si quieres autoload, descomenta:
-    // loadChannel(filtered[0]);
-  }
 }
 
-// overlay: primer click
+/* =========================
+   EVENTOS
+   ========================= */
 blocker.onclick = () => {
   blocker.style.display = "none";
   hint.style.display = "none";
 };
 
-// re-render al buscar
-search.addEventListener("input", () => renderChannelList());
+search.addEventListener("input", renderChannelList);
 
-// init
+/* =========================
+   INIT
+   ========================= */
 renderCategories();
 renderChannelList();
 </script>
