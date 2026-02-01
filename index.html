@@ -15,7 +15,6 @@ body {
   height: 100vh;
 }
 
-/* LISTA DE CANALES */
 #channels {
   width: 260px;
   background: #1c1c1c;
@@ -33,7 +32,6 @@ body {
 .channel:hover { background: #333; }
 .channel.active { background: #0078ff; }
 
-/* PLAYER */
 #playerWrap {
   position: relative;
   flex: 1;
@@ -53,7 +51,6 @@ iframe {
   inset: 0;
   z-index: 10;
   background: rgba(0,0,0,0.55);
-  display: none;
   cursor: pointer;
 }
 
@@ -76,26 +73,22 @@ iframe {
 
 <body>
 
-<!-- LISTA -->
 <div id="channels"></div>
 
-<!-- PLAYER -->
 <div id="playerWrap">
   <div id="clickBlocker"></div>
-  <div id="hint">Haz clic una vez para activar audio</div>
+  <div id="hint">Haz clic una vez para iniciar el canal</div>
 
   <iframe
     id="iframePlayer"
     src=""
     loading="lazy"
     allow="autoplay; fullscreen; picture-in-picture"
-    allowfullscreen
-    sandbox="allow-scripts allow-same-origin allow-presentation allow-autoplay">
+    allowfullscreen>
   </iframe>
 </div>
 
 <script>
-// ===== CANALES =====
 const channels = [
   { id: 302, name: "Canal 302" },
   { id: 491, name: "beIN Sports Australia 1" },
@@ -108,16 +101,13 @@ const iframe = document.getElementById("iframePlayer");
 const blocker = document.getElementById("clickBlocker");
 const hint = document.getElementById("hint");
 
-// ===== CARGAR CANAL =====
 function loadChannel(channel, div) {
   document.querySelectorAll(".channel").forEach(c => c.classList.remove("active"));
   div.classList.add("active");
 
-  // activar bloqueador para primer click
   blocker.style.display = "block";
   hint.style.display = "block";
 
-  // limpiar src primero
   iframe.removeAttribute("src");
 
   setTimeout(() => {
@@ -125,18 +115,15 @@ function loadChannel(channel, div) {
   }, 200);
 }
 
-// ===== DESBLOQUEAR AUDIO / POPUPS =====
 blocker.onclick = () => {
   blocker.style.display = "none";
   hint.style.display = "none";
 };
 
-// ===== CREAR LISTA =====
 channels.forEach((ch, index) => {
   const div = document.createElement("div");
   div.className = "channel";
   div.textContent = ch.name;
-
   div.onclick = () => loadChannel(ch, div);
   list.appendChild(div);
 
